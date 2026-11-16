@@ -3,3 +3,4 @@ __pycache__/
 all.js
 node_modules/
 *.png
+!icons/*.png

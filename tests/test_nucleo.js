@@ -71,5 +71,31 @@ const tr = N.temasRecurrentes([{tema: 'b1-11', anio: 2016, enunciado: 'El recurs
 ok(tr.frecuentes[0].tema === 'recurso de alzada' && tr.olvidados.length === 1, 'generador: subtemas frecuentes y olvidados');
 ok(N.aGIFT([{enunciado: '¿2+2?', opciones: ['3', '4', '5', '6'], correcta: 2}]).includes('=4'), 'exportación GIFT');
 
+// repaso espaciado
+let e = N.registra(null, false, '2026-11-16'); ok(e.caja === 0 && e.prox === '2026-11-17' && e.ko === 1, 'repaso: fallo → caja 0, vuelve mañana');
+e = N.registra(e, true, '2026-11-17'); ok(e.caja === 1 && e.prox === '2026-11-18', 'repaso: acierto en repaso → caja 1');
+e = N.registra(e, true, '2026-11-18'); ok(e.caja === 2 && e.prox === '2026-11-21', 'repaso: caja 2 → 3 días');
+ok(N.registra(null, true, '2026-11-16').prox === null, 'repaso: acierto a la primera no entra en repaso');
+let z = N.registra({caja: 4, prox: '2026-12-01', v: 5, ok: 4, ko: 1}, true, '2026-12-01'); ok(z.caja === 5 && z.prox === null, 'repaso: caja 5 = dominada');
+ok(N.pendientes({a: {prox: '2026-11-18', caja: 1}, b: {prox: '2026-11-15', caja: 0}, c: {prox: '2026-12-01', caja: 2}, d: {prox: null}}, '2026-11-18').join() === 'b,a', 'repaso: pendientes, los más atrasados primero');
+// plan por tema
+const pq = [{id: 'x1', tema: 'b1-11'}, {id: 'x2', tema: 'b1-11'}, {id: 'y1', tema: 'b2-09'}];
+const pl = N.plan({x1: {ok: 2, ko: 4}, x2: {ok: 0, ko: 2}, y1: {ok: 1, ko: 0}}, pq, [{id: 'b1-11', n: 4, bloque: 'b1'}, {id: 'b2-09', n: 8, bloque: 'b2'}], 6);
+ok(pl[0].id === 'b1-11' && Math.abs(pl[0].enJuego - 3) < 1e-9 && pl[1].datos === false, 'plan: esperadas × tasa de fallo y «sin datos» con pocas respuestas');
+// búsqueda y aviso
+ok(N.busca([{id: 1, anio: 2024, tema: 'b1-11', enunciado: 'El recurso de alzada en la Ley 39/2015', opciones: []}, {id: 2, anio: 2024, tema: 'b1-01', enunciado: 'Constitución', opciones: []}], 'recurso alzada').length === 1, 'búsqueda: sin tildes y por varias palabras');
+ok(N.urlAviso('a/b', {id: '2024-0-001', anio: 2024, n: 1, bloque: 'b1', tema: 'b1-01', enunciado: 'x', correcta: 2}, 'Auxiliar AGE').startsWith('https://github.com/a/b/issues/new?labels=error-pregunta&title=Error%20en%20Auxiliar%20AGE%202024'), 'aviso de error: incidencia de GitHub rellenada');
+// panel
+ok(N.revisaEstilo({opciones: ['Sí.', 'No.', 'Quizá.', 'La respuesta correcta y muy detallada con todos los matices necesarios'], correcta: 4}).length === 1, 'estilo: correcta mucho más larga');
+ok(N.veredictoPanel(2, [2, 2], {contra: {veredicto: 'ok'}, lista: {veredicto: 'ok'}}) === 'aceptada', 'panel: aceptada solo si todo cuadra');
+ok(N.veredictoPanel(2, [2, 2], {contra: {veredicto: 'mala'}, lista: {veredicto: 'ok'}}) === 'descartada' && N.veredictoPanel(2, [2, 2], {contra: {veredicto: 'ok'}, lista: {veredicto: 'mala'}}) === 'dudosa', 'panel: «mala» del Contradictor descarta; de la Lista, dudosa');
+ok(N.veredictoPanel(2, [2, 3], {contra: {veredicto: 'ok'}, lista: {veredicto: 'ok'}}) === 'dudosa' && N.veredictoPanel(2, [1, 3]) === 'descartada', 'panel: un resolutor discrepa → dudosa; ninguno → descartada');
+const mt = N.metricas([{res: [1, 1], buena: {clave: 1, contra: 'ok', lista: 'ok', estilo: []}, mala: {clave: 3, contra: 'mala', lista: 'ok', estilo: []}}, {res: [2, 2], buena: {clave: 2, contra: 'dudosa', lista: 'ok', estilo: []}, mala: {clave: 2, contra: 'ok', lista: 'ok', estilo: []}}]);
+ok(mt.A.ta === 1 && mt.A.fa === 0.5 && mt.C.ta === 0.5 && mt.precisionAcuerdo === 1, 'métricas de la medición');
+// examen generado y examen por año
+const pe = N.planExamen(P, cfg.examen, 110);
+ok(Object.values(pe).reduce((a, v) => a + v, 0) === 110 && Object.keys(pe).filter(k => k.startsWith('b1')).reduce((a, k) => a + pe[k], 0) === 30, 'plan del examen con IA: 110 = 30 + 30 + 50 por temas');
+const ea = N.examenAnio(banco, 2024, cfg.examen);
+ok(ea.length === 111 && ea[0].bloque === 'b1' && ea.at(-1).bloque === 'b2' && !ea.some(q => q.reserva), 'examen oficial por año: todas las no reserva (110 + 1 sin tema), en orden');
 console.log(fallos ? `\n${fallos} pruebas fallan` : '\nTodas las pruebas pasan');
 process.exit(fallos ? 1 : 0);

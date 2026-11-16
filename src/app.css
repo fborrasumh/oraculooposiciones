@@ -65,3 +65,9 @@ table{border-collapse:collapse;width:100%;font-size:13.8px}th{background:var(--p
 .oo-bloque .om-bar span{background:var(--c)}
 @media(max-width:620px){.oo-opchip{max-width:110px;overflow:hidden;text-overflow:ellipsis}}
 .om-cab{align-items:center}
+
+.om-exp:empty{display:none}.om-expbox{margin-top:10px;padding:12px 14px;border-radius:12px;background:#F6F3FF;border:1px solid #DCD3FF}
+.om-res{padding:9px 0;border-bottom:1px solid var(--linea-2);font-size:14.5px;line-height:1.5}.om-res small{color:var(--acero)}
+.om-check{display:flex;gap:10px;align-items:flex-start;margin:12px 0 4px;font-size:14.5px;line-height:1.5}.om-check input{margin-top:4px;width:18px;height:18px;flex:none}
+.om-fila{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--linea,#e5e5e5)}.om-fila:last-child{border-bottom:0}
+.om-atajos{margin-top:4px}

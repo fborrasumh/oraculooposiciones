@@ -34,6 +34,8 @@ Como la estructura es fija, **la predicción se hace dentro de cada bloque**: c�
 
 ## Qué hace
 
+### Gratis y sin clave
+
 1. **Predicción por tema dentro de cada bloque**, con intervalo del 80 % y probabilidad de que el tema salga.
    - Media ponderada en la que los exámenes recientes pesan más (semivida de 3 años), más la mitad de la tendencia.
    - La tabla indica en cuántos exámenes ha salido cada tema, porque el temario cambia entre convocatorias.
@@ -46,13 +48,38 @@ Como la estructura es fija, **la predicción se hace dentro de cada bloque**: c�
    - Puntuación directa con penalización y nota aproximada sobre 50 por parte.
    - Reloj al ritmo del examen y enlace para retar a otra persona con el mismo examen.
 4. **Reto diario.** Diez preguntas oficiales, iguales para todo el mundo cada día y por oposición. Lleva racha y un resultado en emojis para compartir.
-5. **Generador con agentes**, con la clave de IA de cada persona:
-   - Un agente redacta preguntas de un tema y cita la norma y el artículo.
-   - Recibe el contexto de exámenes anteriores: subtemas frecuentes, subtemas olvidados y seis preguntas oficiales recientes.
-   - Dos agentes resuelven a ciegas con las opciones barajadas.
-   - El código comprueba el formato y descarta las copias del banco oficial.
-   - Solo se aceptan las preguntas que los tres responden igual.
-   - Exporta a Word, CSV y Moodle (GIFT).
+5. **Mi estudio:**
+   - Repaso espaciado de los fallos: vuelven a los 1, 3, 7, 21 y 60 días.
+   - Plan «dónde ganas más puntos»: preguntas esperadas de cada tema × tu porcentaje de fallo.
+6. **Banco y exámenes:**
+   - Un examen oficial completo de un año concreto, sin reserva, anuladas ni preguntas con tabla.
+   - Buscador por palabras, tema y año, y práctica con los resultados.
+7. **Cómo se valida:**
+   - Tabla de cada examen: preguntas, respuestas leídas, anuladas, tipo de plantilla y cotejo de las anuladas con lo publicado.
+   - Exámenes apartados y su motivo, y fiabilidad de la predicción por bloque.
+   - Medición del panel de agentes.
+8. **Instalable y sin conexión** (manifest y service worker): una vez abierta, funciona sin internet salvo la IA.
+9. **Avisar de un error** desde cada pregunta corregida: abre una incidencia de GitHub ya rellenada.
+
+El estudio de cada oposición (repaso, generadas, simulacro a medias) se guarda por separado.
+
+### Con la clave de IA de cada persona
+
+10. **«¿Por qué?»**: la IA explica la respuesta de la plantilla, sin poder cambiarla. Si un cambio normativo la hace discutible, lo avisa aparte. La explicación se guarda para no pagarla dos veces.
+11. **Generador con un panel de cinco agentes**, inspirado en DiagnostIA:
+    - Un redactor escribe con el contexto de exámenes anteriores y cita la norma y el artículo.
+    - Dos resolutores contestan a ciegas, con las opciones barajadas.
+    - El **Contradictor** intenta demostrar que la pregunta está mal.
+    - La **Lista de control** revisa la redacción con ocho normas.
+    - El código comprueba el formato, el estilo y que no sea una copia del banco oficial.
+    - Solo se aprueba lo que supera todo el panel; el resto queda como dudosa o se descarta.
+    - Si hay claves de dos proveedores, el segundo resuelve y revisa por defecto.
+12. **Examen completo generado con IA**, con la estructura de la convocatoria (30 + 30 + 50) y el reparto predicho por tema:
+    - Es reanudable si se corta.
+    - Puede completarse con preguntas oficiales del mismo tema, marcadas como tales.
+    - Se hace como simulacro y se exporta a Word y GIFT.
+13. **Mis generadas:** todo lo generado, guardado en IndexedDB y por oposición, con simulacro, Word y GIFT, y copia y recuperación en JSON.
+14. **Tu clave de IA:** guía para conseguir la clave con límite de gasto, coste estimado y diferencia con una suscripción al chatbot.
 
 ## Lo que no hace (límites reales)
 
@@ -61,7 +88,9 @@ Como la estructura es fija, **la predicción se hace dentro de cada bloque**: c�
 - **El temario y las leyes cambian.** Una pregunta de 2016 puede estar desfasada (versiones antiguas de Office o leyes modificadas). Los temas nuevos tienen pocos exámenes detrás.
 - **Psicotécnicas con tabla y preguntas con imagen:** no entran en los simulacros, porque la tabla no se extrae con fiabilidad. Sí cuentan para la predicción.
 - **La nota sobre 50 es aproximada.** La oficial usa una fórmula de transformación y unos mínimos que publica la Comisión Permanente de Selección en cada convocatoria.
-- **Que tres agentes coincidan no garantiza que una pregunta generada sea correcta.**
+- **El panel de agentes no garantiza que una pregunta generada sea correcta.** La medición publicada dice cuántas respuestas erróneas se cuelan.
+- **«¿Por qué?» puede equivocarse** en la explicación, aunque la respuesta sea siempre la de la plantilla.
+- **Repaso, generadas y racha viven en el navegador.** Si se borran los datos del navegador, se pierden, salvo la copia JSON de «Mis generadas».
 - Herramienta independiente, sin relación con el INAP ni con los organismos convocantes.
 
 ## Datos: cómo se traen los exámenes al repositorio
@@ -75,6 +104,12 @@ Como la estructura es fija, **la predicción se hace dentro de cada bloque**: c�
    - Asigna parte, bloque y reserva, y clasifica el tema.
    - Escribe `banco.json` e `informe.md`, con preguntas, partes, reserva, respuestas leídas y anuladas de cada examen.
 3. `scripts/opos_clasifica_ia.py` asigna el tema con IA (secreto `OPENAI_API_KEY`, modelo `gpt-6-luna`), ofreciendo solo los temas del bloque de cada pregunta.
+4. Con el paso `calibrar`, `scripts/opos_calibracion.py` mide el panel de agentes con 100 preguntas oficiales y escribe `data/<op>/calibracion.json`, que la app publica en «Cómo se valida».
+   - Ejecuta el mismo código de la app en un Chromium.
+   - Cada pregunta pasa por el panel con su respuesta oficial y con una errónea puesta a propósito.
+   - Así se mide cuántas buenas acepta y cuántas erróneas deja pasar.
+
+Las anuladas publicadas en su momento están en `data/<op>/verificacion.json`, y la extracción las coteja.
 
 Exámenes del turno libre en el banco (sede del INAP): 2022 (plantilla provisional), 2023, 2024, 2025 (llamamiento extraordinario) y 2026, con 599 preguntas en total. En los cinco, el emparejamiento con la plantilla cubre todas las preguntas y las anuladas coinciden con las publicadas.
 
@@ -95,9 +130,9 @@ Si no existe `banco.json`, la app funciona en **modo demostración**: recuentos 
 
 ## Privacidad
 
-- La predicción, los simulacros, el reto, la racha y la clave de IA se quedan en el navegador.
-- El generador envía al proveedor elegido el tema y unas preguntas oficiales de ejemplo, nunca datos de la persona. Antes del primer envío muestra lo que va a salir.
-- Cada tanda son tres llamadas a la IA, pagadas con la clave de cada persona.
+- La predicción, los simulacros, el reto, el repaso, las generadas y la clave de IA se quedan en el navegador.
+- El generador y «¿Por qué?» envían al proveedor elegido el tema o la pregunta oficial, nunca datos de la persona. Antes del primer envío muestran lo que va a salir.
+- Cada tanda del generador son cinco llamadas a la IA, pagadas con la clave de cada persona.
 
 ## Desarrollo y pruebas
 
@@ -120,7 +155,7 @@ Fuente de las preguntas oficiales: cuadernillos y plantillas de respuestas publi
 
 ## Cómo citar
 
-Borrás Rocher, F. (2026). *OráculoOposiciones* (v1.0.0) [Software]. https://github.com/fborrasumh/oraculooposiciones (DOI en trámite)
+Borrás Rocher, F. (2026). *OráculoOposiciones* (v1.1.0) [Software]. https://github.com/fborrasumh/oraculooposiciones (DOI en trámite)
 
 ## Licencia
 

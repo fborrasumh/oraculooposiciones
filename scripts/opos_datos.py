@@ -310,6 +310,7 @@ def main():
     cfg = json.loads((base / 'config.json').read_text(encoding='utf-8'))
     fuentes = {str(f['anio']): f for f in json.loads((base / 'fuentes.json').read_text(encoding='utf-8'))['examenes']}
     ia = json.loads((base / 'clasificacion_ia.json').read_text(encoding='utf-8')) if (base / 'clasificacion_ia.json').exists() else {}
+    ver = json.loads((base / 'verificacion.json').read_text(encoding='utf-8')) if (base / 'verificacion.json').exists() else {}
     preg, informes = [], []
     for d in sorted(p for p in (base / 'raw').glob('20[0-9][0-9]') if p.is_dir()):
         f = fuentes.get(d.name, {})
@@ -318,6 +319,9 @@ def main():
         try: qs, inf = procesa(d, cfg, fuentes.get(d.name, {}))
         except Exception as e: qs, inf = [], {'anio': int(d.name), 'ok': False, 'error': f'{type(e).__name__}: {e}'}
         for q in qs: asigna_tema(q, cfg, ia)
+        v = ver.get(d.name)
+        if v and inf.get('ok'):   # cotejo con las anuladas publicadas en su momento
+            inf['cotejo'] = {'coincide': inf.get('anuladas', 0) == v['n'], 'publicadas': v['n'], 'fuente': v.get('fuente', '')}
         preg += qs; informes.append(inf)
     temas = [{'id': t['id'], 'bloque': t['bloque'], 'num': t['num'], 'nombre': t['nombre']} for t in cfg['temas']]
     datos = {'generado': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'), 'oposicion': op,
@@ -326,10 +330,10 @@ def main():
              'temas': temas, 'examenes': informes, 'preguntas': preg}
     (base / 'banco.json').write_text(json.dumps(datos, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
     L = [f"# Informe de extracción · {cfg['nombre']}", '', f"Generado: {datos['generado']}", '',
-         '| Examen | Fecha | Preguntas | 1.ª parte | 2.ª parte | Reserva | Con respuesta | Anuladas | Plantilla | Estado |', '|---|---|---|---|---|---|---|---|---|---|']
+         '| Examen | Fecha | Preguntas | 1.ª parte | 2.ª parte | Reserva | Con respuesta | Anuladas | Cotejo | Plantilla | Estado |', '|---|---|---|---|---|---|---|---|---|---|---|']
     for i in informes:
         pp = i.get('por_parte', {})
-        L.append(f"| {i['anio']} | {i.get('fecha') or '¿?'} | {i.get('preguntas', 0)} | {pp.get('p1', 0)} | {pp.get('p2', 0)} | {i.get('reserva', 0)} | {i.get('con_respuesta', 0)} | {i.get('anuladas', 0)} | {i.get('plantilla_tipo') or '—'} | {('✓ ' + i.get('aviso', '')) if i['ok'] else '✕ ' + i.get('error', '')} |")
+        L.append(f"| {i['anio']} | {i.get('fecha') or '¿?'} | {i.get('preguntas', 0)} | {pp.get('p1', 0)} | {pp.get('p2', 0)} | {i.get('reserva', 0)} | {i.get('con_respuesta', 0)} | {i.get('anuladas', 0)} | {('✓' if i['cotejo']['coincide'] else '✕ publicadas: ' + str(i['cotejo']['publicadas'])) if i.get('cotejo') else '—'} | {i.get('plantilla_tipo') or '—'} | {('✓ ' + i.get('aviso', '')) if i['ok'] else '✕ ' + i.get('error', '')} |")
     sc = sum(1 for q in preg if q['tema'].endswith('-otros')); nia = sum(1 for q in preg if q.get('metodo') == 'ia')
     L += ['', f'Preguntas totales: {len(preg)} · tema asignado con IA: {nia} · sin tema: {sc} ({sc / max(1, len(preg)):.0%})', '',
           'Esperado en cada examen reciente: 60 en la 1.ª parte y 50 en la 2.ª (más reserva). Si un examen se aparta, revisa su cuadernillo.',

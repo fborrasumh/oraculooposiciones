@@ -28,5 +28,7 @@ if __name__ == '__main__':
     js = (R/'src'/'i18n.js').read_text(encoding='utf-8') if (R/'src'/'i18n.js').exists() else 'const I18N={en:{},pt:{}};'
     base = (R/'forja'/'js'/'65-i18n.js').read_text(encoding='utf-8')
     prog = base.split('const _dict')[0].replace('let LANG', 'var LANG') + '\n' + js + '\nconst K=' + json.dumps(claves(), ensure_ascii=False) + ';\nfor (const l of ["en","pt"]) { const d={...(I18N_BASE[l]||{}),...(I18N[l]||{})}; for (const k of K) if (d[k]===undefined) console.log(l+"\\t"+k); }'
-    out = subprocess.run(['node', '-e', 'const APP="x";' + prog], capture_output=True, text=True)
+    import tempfile
+    with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8') as f: f.write('const APP="x";' + prog)
+    out = subprocess.run(['node', f.name], capture_output=True, text=True)
     print(out.stdout or 'Completo', out.stderr[:2000])

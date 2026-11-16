@@ -15,7 +15,8 @@
     <p class="eyebrow" data-i18n="hero.eyebrow">Oposiciones masivas · Exámenes oficiales · Universidad Miguel Hernández de Elche</p>
     <h1 data-i18n="hero.h1">Lo que dicen los exámenes oficiales <em>sobre tu próxima oposición</em></h1>
     <p class="lede" data-i18n="hero.lede">OráculoOposiciones cuenta cuántas preguntas ha puesto cada tema en los exámenes oficiales, estima cuántas caerán en el próximo y te dice cuánto fiarte de esa estimación. Practica gratis con preguntas oficiales y su respuesta de la plantilla, con la estructura real del examen.</p>
-    <div class="actions"><button class="btn btn-primary btn-big" id="btnStart" type="button"><svg class="i"><use href="#i-target"/></svg><span data-i18n="s.empezar">Ver la predicción</span></button><button class="btn btn-ghost btn-big" id="btnEjemplo" type="button"><svg class="i"><use href="#i-flame"/></svg><span data-i18n="s.ejemplo">Reto de hoy</span></button></div>
+    <div class="actions"><button class="btn btn-primary btn-big" id="btnStart" type="button"><svg class="i"><use href="#i-target"/></svg><span data-i18n="s.empezar">Ver la predicción</span></button><button class="btn btn-ghost btn-big" id="btnInstalar" type="button" hidden><svg class="i"><use href="#i-phone"/></svg><span data-i18n="s.instalar">Instalar la app</span></button><button class="btn btn-ghost btn-big" id="btnEjemplo" type="button"><svg class="i"><use href="#i-flame"/></svg><span data-i18n="s.ejemplo">Reto de hoy</span></button></div>
+    <div class="actions om-atajos"><button class="btn btn-ghost btn-sm" type="button" data-irpaso="6"><svg class="i"><use href="#i-bookmark"/></svg><span data-i18n="Mi estudio">Mi estudio</span></button><button class="btn btn-ghost btn-sm" type="button" data-irpaso="7"><svg class="i"><use href="#i-archive"/></svg><span data-i18n="Banco y exámenes">Banco y exámenes</span></button><button class="btn btn-ghost btn-sm" type="button" data-irpaso="9"><svg class="i"><use href="#i-folder"/></svg><span data-i18n="Mis generadas">Mis generadas</span></button><button class="btn btn-ghost btn-sm" type="button" data-irpaso="10"><svg class="i"><use href="#i-key"/></svg><span data-i18n="Tu clave de IA">Tu clave de IA</span></button><button class="btn btn-ghost btn-sm" type="button" data-irpaso="8"><svg class="i"><use href="#i-shield"/></svg><span data-i18n="Validación">Validación</span></button></div>
     <p class="fa-inicio" id="inicioProj"></p>
     <div class="fa-autores"><span class="fa-autores-cap" data-i18n="Realizada por">Realizada por</span>
       <div class="fa-autor"><span class="fa-av" style="--c:#E4572E">FB</span><div><b>Fernando Borrás Rocher</b><small>Universidad Miguel Hernández de Elche</small><a class="fa-orcid" href="https://orcid.org/0000-0002-5519-4573" target="_blank" rel="noopener">ORCID 0000-0002-5519-4573</a></div></div>
@@ -30,7 +31,7 @@
   <div class="journey" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
     <div class="jstop" style="--c:#6B4FD8"><span class="jn">1</span><div class="ji"><svg class="i"><use href="#i-target"/></svg></div><b data-i18n="s.j1b">Predicción por tema</b><span data-i18n="s.j1s">Dentro de cada bloque del examen, cuántas preguntas caerán de cada tema, con un margen y con una prueba a ciegas de lo que habría acertado otros años.</span></div>
     <div class="jstop" style="--c:#E4572E"><span class="jn">2</span><div class="ji"><svg class="i"><use href="#i-quiz"/></svg></div><b data-i18n="s.j2b">Simulacro con la estructura real</b><span data-i18n="s.j2s">Preguntas oficiales en la proporción que se espera, en el orden y con la penalización del examen. Gratis y sin clave.</span></div>
-    <div class="jstop" style="--c:#0E8C7A"><span class="jn">3</span><div class="ji"><svg class="i"><use href="#i-users"/></svg></div><b data-i18n="s.j3b">Preguntas nuevas, revisadas por agentes</b><span data-i18n="s.j3s">Con tu clave, un agente redacta y otros dos la resuelven a ciegas. Solo pasa lo que los tres responden igual.</span></div>
+    <div class="jstop" style="--c:#0E8C7A"><span class="jn">3</span><div class="ji"><svg class="i"><use href="#i-users"/></svg></div><b data-i18n="s.j3b">Preguntas nuevas, revisadas por agentes</b><span data-i18n="s.j3s">Con tu clave, un panel de cinco agentes redacta, resuelve a ciegas, busca fallos y revisa la redacción. Solo pasa lo que supera todo el panel.</span></div>
   </div>
   <h2 class="sec-title" data-i18n="Dónde va cada cosa">Dónde va cada cosa</h2>
   <div class="zonas"><div class="zona l"><h4 data-i18n="Siempre en tu ordenador">Siempre en tu ordenador</h4><ul data-i18n="s.zl">
@@ -41,7 +42,7 @@
 
 <!-- 1 · PREDICCIÓN -->
 <section class="screen" data-step="1">
-  <header class="sh" style="--c:#6B4FD8"><div class="sh-ico"><svg class="i"><use href="#i-target"/></svg></div><div><p class="sh-step" data-i18n="s.paso1">Paso 1 de 3</p><h2 id="predTit"></h2><p class="sh-lede" data-i18n="s.pred.lede">El número de preguntas de cada bloque lo fija la convocatoria; lo que se estima es cómo se reparten entre los temas. Es una prioridad de estudio, no una promesa: en cada bloque ves cuánto acertó el método en exámenes que no conocía.</p></div></header>
+  <header class="sh" style="--c:#6B4FD8"><div class="sh-ico"><svg class="i"><use href="#i-target"/></svg></div><div><p class="sh-step" data-i18n="s.paso1">Paso 1 de 4</p><h2 id="predTit"></h2><p class="sh-lede" data-i18n="s.pred.lede">El número de preguntas de cada bloque lo fija la convocatoria; lo que se estima es cómo se reparten entre los temas. Es una prioridad de estudio, no una promesa: en cada bloque ves cuánto acertó el método en exámenes que no conocía.</p></div></header>
   <div class="card"><div class="actions" style="margin-top:0"><button class="btn btn-primary btn-sm" id="btnCompartePred" type="button"><svg class="i"><use href="#i-ext"/></svg><span data-i18n="s.compartePred">Compartir la predicción</span></button><button class="btn btn-ghost btn-sm" id="btnCsvPred" type="button">CSV</button></div>
     <p class="help" id="notaPred"></p></div>
   <div id="predBloques"></div>
@@ -49,7 +50,7 @@
 
 <!-- 2 · SIMULACRO -->
 <section class="screen" data-step="2">
-  <header class="sh" style="--c:#E4572E"><div class="sh-ico"><svg class="i"><use href="#i-quiz"/></svg></div><div><p class="sh-step" data-i18n="s.paso2">Paso 2 de 3</p><h2 data-i18n="s.sim">Simulacro probable</h2><p class="sh-lede" id="simLede"></p></div></header>
+  <header class="sh" style="--c:#E4572E"><div class="sh-ico"><svg class="i"><use href="#i-quiz"/></svg></div><div><p class="sh-step" data-i18n="s.paso2">Paso 2 de 4</p><h2 data-i18n="s.sim">Simulacro probable</h2><p class="sh-lede" id="simLede"></p></div></header>
   <div class="card" id="simConfig">
     <div class="grid2">
       <div class="field"><label for="simModo" data-i18n="s.modo">Qué practicar</label><select id="simModo"></select></div>
@@ -64,7 +65,7 @@
 
 <!-- 3 · GENERADOR IA -->
 <section class="screen" data-step="3">
-  <header class="sh" style="--c:#0E8C7A"><div class="sh-ico"><svg class="i"><use href="#i-users"/></svg></div><div><p class="sh-step" data-i18n="s.paso3">Paso 3 de 3</p><h2 data-i18n="s.gen">Preguntas nuevas con agentes de IA</h2><p class="sh-lede" data-i18n="s.gen.lede">Un agente redacta preguntas al estilo del examen oficial del tema que elijas, con el contexto de lo que ha salido otros años. Dos agentes resolutores las contestan a ciegas, con las opciones barajadas. Solo se aceptan las que los tres responden igual; el código comprueba además el formato y que no sean copias del banco oficial.</p></div></header>
+  <header class="sh" style="--c:#0E8C7A"><div class="sh-ico"><svg class="i"><use href="#i-users"/></svg></div><div><p class="sh-step" data-i18n="s.paso3">Paso 3 de 4</p><h2 data-i18n="s.gen">Preguntas nuevas con agentes de IA</h2><p class="sh-lede" data-i18n="s.gen.lede">Un panel de cinco agentes, inspirado en DiagnostIA: uno redacta preguntas al estilo del examen oficial del tema que elijas, con el contexto de lo que ha salido otros años; dos las resuelven a ciegas con las opciones barajadas; el Contradictor intenta demostrar que están mal y la Lista de control revisa la redacción. El código comprueba además el formato, el estilo y que no sean copias del banco oficial. Solo se aceptan las que superan todo el panel.</p></div></header>
   <div class="card">
     <div class="grid3">
       <div class="field"><label for="genTema" data-i18n="s.tema">Tema</label><select id="genTema"></select></div>
@@ -73,14 +74,97 @@
     </div>
     <div class="actions"><button class="btn btn-primary" id="btnGen" type="button"><svg class="i"><use href="#i-sparkles"/></svg><span data-i18n="s.generar">Redactar y verificar</span></button></div>
     <p class="help" id="genEstado" role="status" aria-live="polite"></p>
-    <div class="aviso" data-i18n="s.gen.aviso">Que tres agentes coincidan reduce mucho los errores, pero no los elimina: varios modelos pueden equivocarse a la vez, y las leyes cambian. Las preguntas oficiales llevan la respuesta de la plantilla; las generadas, no. Comprueba cada una con el texto de la norma que cita.</div></div>
+    <p class="help"><a href="#" data-clave="1" data-i18n="¿No tienes clave? Así se consigue (y lo que cuesta)">¿No tienes clave? Así se consigue (y lo que cuesta)</a> · <a href="#" data-mias="1" data-i18n="Ver todo lo que he generado">Ver todo lo que he generado</a></p>
+    <p class="help" id="genCalib"></p>
+    <div class="aviso" data-i18n="s.gen.aviso">El panel reduce mucho los errores, pero no los elimina: varios modelos pueden equivocarse a la vez, y las leyes cambian. Las preguntas oficiales llevan la respuesta de la plantilla; las generadas, no. Comprueba cada una con el texto de la norma que cita; en «Cómo se valida» tienes la medición de cuántas respuestas erróneas se cuelan.</div></div>
   <div id="genRes"></div>
 </section>
 
-<!-- 4 · RETO DIARIO (sección fuera del recorrido) -->
+<!-- 4 · EXAMEN COMPLETO GENERADO CON IA -->
 <section class="screen" data-step="4">
+  <header class="sh" style="--c:#C98200"><div class="sh-ico"><svg class="i"><use href="#i-rocket"/></svg></div><div><p class="sh-step" data-i18n="s.paso4">Paso 4 de 4</p><h2 id="exTit"></h2><p class="sh-lede" data-i18n="s.ex.lede">Un examen entero de preguntas nuevas, con la estructura de la convocatoria y repartidas por tema según la predicción. Cada pregunta pasa por el panel de cinco agentes del generador y solo entra si lo supera. Después, lo haces como simulacro con reloj y penalización.</p></div></header>
+  <div class="card">
+    <div class="grid3">
+      <div class="field"><label for="exN" data-i18n="s.nPreg">Número de preguntas</label><select id="exN"><option value="25">25</option><option value="50">50</option><option value="0" selected data-i18n="s.exCompleto">Examen completo</option></select></div>
+      <div class="field"><label for="exRev" data-i18n="s.revisor">Segundo resolutor</label><select id="exRev"></select></div>
+      <div class="field"><label for="exTiempo" data-i18n="s.tiempo">Tiempo</label><select id="exTiempo"><option value="real" id="optRitmoEx"></option><option value="libre" data-i18n="s.tLibre">Sin límite</option></select></div>
+    </div>
+    <label class="om-check"><input type="checkbox" id="exRelleno" checked> <span data-i18n="s.exRelleno">Si los agentes descartan preguntas y faltan, completar con preguntas oficiales de ese tema (se indican como oficiales)</span></label>
+    <p class="help" id="exEstima"></p>
+    <div class="actions"><button class="btn btn-primary" id="btnExGen" type="button"><svg class="i"><use href="#i-sparkles"/></svg><span data-i18n="s.exGen">Generar el examen</span></button></div>
+    <p class="help" id="exEstado" role="status" aria-live="polite"></p>
+    <p class="help"><a href="#" data-clave="1" data-i18n="¿No tienes clave? Así se consigue (y lo que cuesta)">¿No tienes clave? Así se consigue (y lo que cuesta)</a> · <a href="#" data-mias="1" data-i18n="Ver todo lo que he generado">Ver todo lo que he generado</a></p>
+    <p class="help" id="exCalib"></p>
+  </div>
+  <div id="exRes"></div>
+</section>
+
+<!-- 5 · RETO DIARIO (sección fuera del recorrido) -->
+<section class="screen" data-step="5">
   <header class="sh" style="--c:#C98200"><div class="sh-ico"><svg class="i"><use href="#i-flame"/></svg></div><div><p class="sh-step" id="retoNum"></p><h2 data-i18n="s.reto">Reto de hoy</h2><p class="sh-lede" data-i18n="s.reto.lede">Diez preguntas oficiales de tu oposición, las mismas para todo el mundo hoy. Compara tu resultado con quien prepara lo mismo que tú y mantén la racha.</p></div></header>
   <div id="retoBox"></div>
+</section>
+
+<!-- 6 · MI ESTUDIO -->
+<section class="screen" data-step="6">
+  <header class="sh" style="--c:#6B4FD8"><div class="sh-ico"><svg class="i"><use href="#i-calendar"/></svg></div><div><h2 data-i18n="s.est">Mi estudio</h2><p class="sh-lede" data-i18n="s.est.lede">Tus fallos vuelven cuando toca, y el plan te dice en qué temas estás perdiendo más puntos según lo que se espera en el próximo examen. Todo se calcula y se guarda en tu navegador, por oposición.</p></div></header>
+  <div class="card"><h3 data-i18n="s.repaso">Repaso espaciado de tus fallos</h3><div id="repasoBox"></div></div>
+  <div id="pracBox"></div>
+  <div class="card"><h3 data-i18n="s.plan">Dónde ganas más puntos</h3><div id="planBox"></div></div>
+</section>
+
+<!-- 7 · BANCO Y EXÁMENES -->
+<section class="screen" data-step="7">
+  <header class="sh" style="--c:#E4572E"><div class="sh-ico"><svg class="i"><use href="#i-archive"/></svg></div><div><h2 data-i18n="s.banco">Banco y exámenes</h2><p class="sh-lede" data-i18n="s.banco.lede">Haz un examen oficial de un año concreto entero, con la respuesta de la plantilla, o busca preguntas por palabras, tema y año.</p></div></header>
+  <div class="card"><h3 data-i18n="s.anio">Un examen oficial completo</h3>
+    <div class="grid3"><div class="field"><label for="bancoAnio" data-i18n="s.anioSel">Año</label><select id="bancoAnio"></select></div>
+      <div class="field"><label for="anioTiempo" data-i18n="s.tiempo">Tiempo</label><select id="anioTiempo"><option value="real" id="optRitmoAnio"></option><option value="libre" data-i18n="s.tLibre">Sin límite</option></select></div></div>
+    <div class="actions"><button class="btn btn-primary" id="btnAnio" type="button"><svg class="i"><use href="#i-play"/></svg><span data-i18n="s.empAnio">Empezar ese examen</span></button></div>
+    <p class="help" data-i18n="s.anio.help">Entran las preguntas puntuables con respuesta en la plantilla. Las de reserva, las anuladas y las que dependen de una tabla no entran.</p></div>
+  <div class="card"><h3 data-i18n="s.buscar">Buscar en el banco</h3>
+    <div class="grid3"><div class="field"><label for="busTexto" data-i18n="s.palabras">Palabras</label><input id="busTexto" type="search" data-i18n-attr="placeholder:s.busPh" placeholder="p. ej. recurso de alzada plazo"></div>
+      <div class="field"><label for="busTema" data-i18n="s.tema">Tema</label><select id="busTema"></select></div>
+      <div class="field"><label for="busAnio" data-i18n="s.anioSel">Año</label><select id="busAnio"></select></div></div>
+    <div class="actions"><button class="btn btn-primary btn-sm" id="btnBusPrac" type="button"><svg class="i"><use href="#i-quiz"/></svg><span data-i18n="s.busPrac">Practicar estos resultados (hasta 40)</span></button></div>
+    <div id="busRes"></div></div>
+</section>
+
+<!-- 8 · VALIDACIÓN -->
+<section class="screen" data-step="8">
+  <header class="sh" style="--c:#0E8C7A"><div class="sh-ico"><svg class="i"><use href="#i-shield"/></svg></div><div><h2 data-i18n="s.val">Cómo se valida</h2><p class="sh-lede" data-i18n="s.val.lede">Qué se ha comprobado de cada examen y cuánto acierta la predicción. Si algo falla, avisa desde la propia pregunta.</p></div></header>
+  <div class="card"><h3 data-i18n="s.valEx">Exámenes y respuestas</h3><div id="valTabla"></div><ul class="fa-ul" id="valLista"></ul></div>
+  <div class="card"><h3 data-i18n="s.valPred">Predicción</h3><div id="valPred"></div></div>
+  <div class="card"><h3 data-i18n="s.valGen">Fiabilidad de las preguntas generadas con IA</h3>
+    <p class="help" data-i18n="s.valGen.txt">Se mide con preguntas oficiales, cuya respuesta conocemos. Cada una pasa por el panel dos veces: con su respuesta oficial y con una respuesta errónea puesta a propósito, como si el redactor se hubiera equivocado. Así se sabe cuántas buenas acepta y cuántas erróneas deja pasar.</p>
+    <div id="valCalib"></div>
+    <div class="actions"><button class="btn btn-ghost btn-sm" id="btnCalib" type="button"><svg class="i"><use href="#i-scale"/></svg><span data-i18n="s.calibMia">Medirlo con mi clave (50 preguntas, unas 25 llamadas)</span></button></div>
+    <p class="help" id="calibEstado" role="status" aria-live="polite"></p><div id="valCalibMia"></div></div>
+  <div class="card"><h3 data-i18n="s.valFuente">Código y datos</h3><p data-i18n="s.valFuente.txt">Todo es abierto: el código, los PDF oficiales y el informe de extracción de cada examen están en el repositorio de GitHub.</p>
+    <div class="actions"><a class="btn btn-ghost btn-sm" href="https://github.com/fborrasumh/oraculooposiciones" target="_blank" rel="noopener"><svg class="i"><use href="#i-github"/></svg><span>GitHub</span></a><a class="btn btn-ghost btn-sm" id="lnkInforme" href="https://github.com/fborrasumh/oraculooposiciones" target="_blank" rel="noopener"><svg class="i"><use href="#i-doc"/></svg><span data-i18n="s.informe">Informe de extracción</span></a></div></div>
+</section>
+
+<!-- 9 · MIS GENERADAS (fuera del recorrido) -->
+<section class="screen" data-step="9">
+  <header class="sh" style="--c:#C98200"><div class="sh-ico"><svg class="i"><use href="#i-folder"/></svg></div><div><h2 data-i18n="Mis generadas">Mis generadas</h2><p class="sh-lede" data-i18n="s.mias.lede">Todo lo que has generado con IA en esta oposición: los exámenes del paso 4 y las preguntas sueltas del paso 3. Se guarda en este navegador, sin servidor.</p></div></header>
+  <div class="card"><p id="miasResumen"></p>
+    <div class="actions"><button class="btn btn-ghost btn-sm" id="btnMiasCopia" type="button"><svg class="i"><use href="#i-download"/></svg><span data-i18n="Hacer una copia (JSON)">Hacer una copia (JSON)</span></button>
+      <label class="btn btn-ghost btn-sm"><svg class="i"><use href="#i-upload"/></svg><span data-i18n="Recuperar una copia">Recuperar una copia</span><input type="file" id="miasImporta" accept=".json,application/json" hidden></label></div></div>
+  <h2 class="sec-title" data-i18n="Exámenes generados">Exámenes generados</h2>
+  <div class="card" id="miasEx"></div>
+  <h2 class="sec-title" data-i18n="Preguntas sueltas del generador">Preguntas sueltas del generador</h2>
+  <div class="card"><div class="grid2"><div class="field"><label for="miasTema" data-i18n="s.tema">Tema</label><select id="miasTema"></select></div>
+      <div class="field"><label for="miasEstado" data-i18n="Estado">Estado</label><select id="miasEstado"><option value="" data-i18n="Todas">Todas</option><option value="aceptada" data-i18n="aprobada por el panel">aprobada por el panel</option><option value="dudosa" data-i18n="dudosa">dudosa</option></select></div></div>
+    <div class="actions"><button class="btn btn-primary btn-sm" id="btnMiasSim" type="button"><svg class="i"><use href="#i-play"/></svg><span data-i18n="Simulacro con estas preguntas (aprobadas)">Simulacro con estas preguntas (aprobadas)</span></button></div>
+    <div id="miasGen"></div></div>
+</section>
+
+<!-- 10 · TU CLAVE DE IA (fuera del recorrido) -->
+<section class="screen" data-step="10">
+  <header class="sh" style="--c:#0E8C7A"><div class="sh-ico"><svg class="i"><use href="#i-key"/></svg></div><div><h2 data-i18n="Tu clave de IA">Tu clave de IA</h2><p class="sh-lede" data-i18n="s.clave.lede">Es opcional. La predicción, los simulacros con preguntas oficiales, el reto diario y el repaso funcionan gratis y sin clave. La clave solo hace falta para las explicaciones con IA y para generar preguntas y exámenes nuevos.</p></div></header>
+  <div class="grid2"><div class="card" id="clavePasos"></div><div class="card" id="claveCoste"></div></div>
+  <h2 class="sec-title" data-i18n="¿Clave de API o suscripción mensual?">¿Clave de API o suscripción mensual?</h2>
+  <div class="grid2"><div class="card" id="claveChat"></div><div class="card" id="claveApi"></div></div>
+  <p class="help" id="claveNota"></p>
 </section>
 </main>
 
@@ -92,6 +176,7 @@
   <div class="field"><label for="apiKey" data-i18n="Tu clave de API">Tu clave de API</label><div class="keyrow"><input type="password" id="apiKey" autocomplete="off"><button class="eye" id="btnEye" type="button" aria-label="Ver" data-i18n-attr="aria-label:Ver"><svg class="i"><use href="#i-eye"/></svg></button></div></div>
   <div class="field"><label for="selModelo" data-i18n="Modelo">Modelo</label><select id="selModelo"></select><input type="text" id="modelo" hidden autocomplete="off" placeholder="Escribe el nombre exacto del modelo" data-i18n-attr="placeholder:Escribe el nombre exacto del modelo" style="margin-top:8px"></div>
   <div class="actions"><button class="btn btn-ghost btn-sm" id="btnModelos" type="button" data-i18n="Ver los modelos de mi clave">Ver los modelos de mi clave</button></div>
+  <p class="help"><button type="button" class="btn btn-ghost btn-sm" data-clave="1" data-i18n="¿Cómo consigo una clave? Guía paso a paso">¿Cómo consigo una clave? Guía paso a paso</button></p>
   <p class="help" id="iaEstado" data-i18n="f.ia.ayuda">La clave se guarda solo en este navegador y se envía únicamente a tu proveedor. Cada persona usa la suya y paga su propio uso. Elige un modelo económico: este uso no necesita el más potente.</p></div></div></div>
 <div class="modal" id="mEnvio" role="dialog" aria-modal="true" aria-labelledby="mEnT"><div class="modal-box"><div class="modal-head"><h2 id="mEnT" data-i18n="Esto es lo que saldría hacia tu proveedor de IA">Esto es lo que saldría hacia tu proveedor de IA</h2><button type="button" data-close data-i18n="Cerrar">Cerrar</button></div><div class="modal-body"><div id="envioInfo"></div><pre class="fa-pre" id="envioTxt"></pre><label class="fa-chk" style="margin:12px 0"><input type="checkbox" id="envioOk"> <span data-i18n="f.envio.chk">He revisado la muestra y confirmo que puede salir de mi ordenador.</span></label><div class="actions"><button class="btn btn-primary" id="envioSi" type="button" disabled data-i18n="s.enviar">Enviar y generar</button><button class="btn btn-ghost" id="envioNo" type="button" data-i18n="Cancelar">Cancelar</button></div></div></div></div>
 <div class="modal" id="mHelp" role="dialog" aria-modal="true" aria-labelledby="mHelpT"><div class="modal-box"><div class="modal-head"><h2 id="mHelpT" data-i18n="Ayuda">Ayuda</h2><button type="button" data-close data-i18n="Cerrar">Cerrar</button></div><div class="modal-body"><div class="glos" id="glos"></div></div></div></div>

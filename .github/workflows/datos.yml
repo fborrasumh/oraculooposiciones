@@ -9,7 +9,7 @@ on:
         default: 'auxiliar-age'
         required: true
       paso:
-        description: 'todo | procesar (sin descargar) | forzar (vuelve a descargarlo todo)'
+        description: 'todo | procesar (sin descargar) | forzar (vuelve a descargarlo todo) | calibrar (mide el panel de agentes con 100 preguntas oficiales)'
         default: 'todo'
         required: true
 permissions:
@@ -24,21 +24,30 @@ jobs:
         with: {python-version: '3.12'}
       - name: Dependencias
         run: |
-          pip install pdfplumber==0.11.4 pillow
+          pip install pdfplumber==0.11.4 pillow playwright==1.47.0
+          if [ "${{ inputs.paso }}" = "calibrar" ]; then python -m playwright install --with-deps chromium; fi
           sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-spa poppler-utils   # OCR de los cuadernillos escaneados (2015-2019)
       - name: Pruebas del extractor
         run: python tests/test_datos.py
       - name: Descargar cuadernillos y plantillas
-        if: inputs.paso != 'procesar'
+        if: inputs.paso != 'procesar' && inputs.paso != 'calibrar'
         run: python scripts/opos_fetch.py "${{ inputs.oposicion }}" ${{ inputs.paso == 'forzar' && '--forzar' || '' }}
       - name: Extraer preguntas y clasificar por palabras clave
+        if: inputs.paso != 'calibrar'
         run: python scripts/opos_datos.py "${{ inputs.oposicion }}" || true
       - name: Tema con IA (secreto OPENAI_API_KEY, modelo gpt-6-luna) y nueva extracción
+        if: inputs.paso != 'calibrar'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           MODELO_IA: gpt-6-luna
         run: python scripts/opos_clasifica_ia.py "${{ inputs.oposicion }}" && python scripts/opos_datos.py "${{ inputs.oposicion }}" || true
+      - name: Medir la fiabilidad del panel de agentes con 100 preguntas oficiales (secreto OPENAI_API_KEY)
+        if: inputs.paso == 'calibrar'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MODELO_IA: gpt-6-luna
+        run: python scripts/opos_calibracion.py "${{ inputs.oposicion }}" 100
       - name: Informe en el resumen de la ejecución
         if: always()
         run: cat "data/${{ inputs.oposicion }}/informe.md" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "Sin informe todavía" >> "$GITHUB_STEP_SUMMARY"

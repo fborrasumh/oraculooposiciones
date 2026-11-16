@@ -1,0 +1,6 @@
+{
+ "_nota": "Anuladas publicadas en su momento, para cotejar lo extraído de la plantilla. «n»: número de anuladas entre las preguntas puntuables y de reserva. Si se conoce, «preguntas» da su número tal como lo citó la fuente (numeración continua del cuadernillo).",
+ "2023": {"n": 3, "preguntas": [107, 108, 118], "fuente": "https://redopositor.com/examenes/resueltos/auxiliar-administrativo-estado-2023/"},
+ "2024": {"n": 1, "preguntas": [23], "fuente": "https://redopositor.com/examenes/resueltos/auxiliar-administrativo-estado-2024/"},
+ "2025": {"n": 1, "preguntas": [113], "fuente": "https://redopositor.com/examenes/resueltos/auxiliar-administrativo-estado-2025/"}
+}

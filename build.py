@@ -38,9 +38,10 @@ connect += cfg.get('connect_extra', [])
 # librerías externas solo para LEER ficheros (40-extract) o si la app llama a cargaLib por su cuenta; Word/ZIP (70-report) no necesitan red
 app_src = ''.join((R/'src'/x).read_text(encoding='utf-8') for x in app_js if (R/'src'/x).exists())
 cdn = 'https://cdnjs.cloudflare.com https://cdn.jsdelivr.net' if (usa('40-') or 'cargaLib(' in app_src) else ''
-csp = "default-src 'none'; script-src 'unsafe-inline'"+(' '+cdn if cdn else '')+"; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data: blob:; media-src blob: data:"
+csp = "default-src 'none'; script-src 'unsafe-inline'"+(' '+cdn if cdn else '')+"; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data: blob:"+''.join(' '+x for x in cfg.get('img_extra', []))+"; media-src blob: data:"
 csp += "; connect-src "+(' '.join(connect) if connect else "'none'")
 if cdn: csp += "; worker-src blob: "+cdn
+csp += ''.join('; ' + x for x in cfg.get('csp_extra', []))
 csp += "; base-uri 'none'; form-action 'none'"
 authors = '; '.join(a['name'] for a in cfg['authors'])
 desc = cfg.get('description') or cfg.get('tagline','')
@@ -49,7 +50,7 @@ html = f'''<!DOCTYPE html>
 <meta http-equiv="Content-Security-Policy" content="{csp}">
 <meta name="author" content="{authors}">
 <meta name="description" content="{desc.replace('"','&quot;')}">
-<title>{cfg['name']} · {cfg.get('tagline','')}</title>{links}
+<title>{cfg['name']} · {cfg.get('tagline','')}</title>{links}{cfg.get('head_extra','')}
 <style>{css}</style></head>
 <body>
 {icons}

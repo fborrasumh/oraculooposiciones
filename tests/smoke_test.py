@@ -1,7 +1,9 @@
 """Prueba de OráculoOposiciones en un Chromium real con IA simulada:  python3 tests/smoke_test.py
 Comprueba: modo demostración, selector de oposición, estructura del examen, predicción por bloques (30/30/50), simulacro
-completo con la estructura real y la penalización de 1/3, enlace para retar, reto diario y racha, generador con tres agentes
-(formato, copia del banco, discrepancias), idiomas, CSP, descargas, datos «reales» sintéticos y desborde en móvil."""
+completo con la estructura real y la penalización de 1/3, enlace para retar, reto diario y racha, «¿Por qué?» anclado a la
+plantilla, generador con panel de cinco agentes (formato, copia del banco, discrepancias, Contradictor), examen completo con IA,
+Mis generadas, Tu clave, repaso espaciado y plan, banco y examen por año, buscador, validación con cotejo, estado por oposición,
+idiomas, CSP, descargas, datos «reales» sintéticos y desborde en móvil."""
 import asyncio, sys, pathlib, re, json
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from forja_test import Harness
@@ -15,10 +17,27 @@ GEN = {'preguntas': [
     {'subtema': 'formato', 'enunciado': LARGO + '¿cuál? (FORMATO)', 'opciones': ['a', 'a', 'Ninguna de las anteriores', 'b'], 'correcta': 7, 'explicacion': '', 'referencia': ''},
     {'subtema': 'copia', 'enunciado': 'Según el artículo 21.3 de la Ley 39/2015, cuando las normas reguladoras del procedimiento no fijen el plazo máximo para resolver, este será de:', 'opciones': ['Un mes.', 'CORRECTA Tres meses.', 'Seis meses.', 'Diez días.'], 'correcta': 2, 'explicacion': '', 'referencia': ''},
     {'subtema': 'clave mal', 'enunciado': LARGO + '¿cuál? (CLAVE MAL)', 'opciones': ['Opción que el redactor da por buena', 'Otra', 'CORRECTA de verdad', 'Otra más'], 'correcta': 1, 'explicacion': '', 'referencia': ''},
-    {'subtema': 'dudosa', 'enunciado': LARGO + '¿cuál? (DUDOSA)', 'opciones': ['CORRECTA según el redactor', 'ALTERNATIVA', 'Otra', 'Otra más'], 'correcta': 1, 'explicacion': '', 'referencia': ''}]}
+    {'subtema': 'dudosa', 'enunciado': LARGO + '¿cuál? (DUDOSA)', 'opciones': ['CORRECTA según el redactor', 'ALTERNATIVA', 'Otra', 'Otra más'], 'correcta': 1, 'explicacion': '', 'referencia': ''},
+    {'subtema': 'contra', 'enunciado': LARGO + 'en materia de plazos, ¿cuál? (CONTRA MALA)', 'opciones': ['CORRECTA para los resolutores', 'Otra opción', 'Otra distinta', 'Otra más'], 'correcta': 1, 'explicacion': '', 'referencia': ''}]}
+LLAMADAS = {'gen': 0}
+
+def gen_unica(n):
+    """para el examen con IA: preguntas distintas en cada llamada (si no, el código las descarta por repetidas)"""
+    LLAMADAS['gen'] += 1; k = LLAMADAS['gen']
+    return {'preguntas': [{'subtema': f's{k}', 'enunciado': ' '.join(f'w{k}x{j}y{i}' for j in range(9)) + ' ¿cuál es la respuesta correcta?', 'opciones': [f'Distractor a{k}{j}', f'CORRECTA b{k}{j}', f'Distractor c{k}{j}', f'Distractor d{k}{j}'], 'correcta': 2, 'explicacion': 'x', 'referencia': 'Ley 39/2015, art. 21'} for j in range(n) for i in [j]]}
 
 async def reply(prov, system, user, info):
-    if 'Redacta ' in user and 'preguntas NUEVAS' in user: return ('j', GEN)
+    if 'Redacta ' in user and 'preguntas NUEVAS' in user:
+        if 'EXAMEN_IA' in user or 'YA REDACTADAS' in user or LLAMADAS.get('modo') == 'examen': return ('j', gen_unica(int(re.search(r'Redacta (\d+)', user).group(1))))
+        return ('j', GEN)
+    if 'Eres el Contradictor' in user:
+        ids = re.findall(r'^id: (\S+)', user, re.M); bloques = user.split('id: ')[1:]
+        return ('j', {'revisiones': [{'id': i, 'veredicto': 'mala' if 'CONTRA MALA' in b else 'ok', 'problema': 'la clave no es la correcta' if 'CONTRA MALA' in b else '', 'alternativa': 0} for i, b in zip(ids, bloques)]})
+    if 'Eres la Lista de control' in user:
+        ids = re.findall(r'^id: (\S+)', user, re.M)
+        return ('j', {'revisiones': [{'id': i, 'veredicto': 'ok', 'fallos': [], 'nota': ''} for i in ids]})
+    if 'Explica a un opositor' in user:
+        return ('j', {'clave': 'IDEA CLAVE DE PRUEBA', 'explicacion': 'Porque lo dice la norma.', 'opciones': ['a', 'b', 'c', 'd'], 'aviso': '', 'repaso': 'Ley 39/2015'})
     if 'Resuelve estas preguntas' in user:
         tribunal = 'tribunal calificador' in user; out = []
         for bloque in user.split('id: ')[1:]:
@@ -39,7 +58,7 @@ def datos_sinteticos():
             for k in range(b['n'] + 5):
                 n += 1; tm = temas[b['id']][(k * 3 + y) % len(temas[b['id']])] if k % 17 else b['id'] + '-otros'
                 pre.append({'id': f'{y}-0-{n:03d}', 'anio': y, 'n': n, 'parte': b['parte'], 'reserva': k >= b['n'], 'bloque': b['id'], 'tema': tm, 'enunciado': f'Enunciado oficial {y} {n} del tema {tm}', 'opciones': ['o1', 'o2', 'o3', 'o4'], 'correcta': 1 + n % 4, 'anulada': n == 5, 'imagen': n == 40, 'plantilla': 'provisional' if y == 2022 else 'definitiva', 'metodo': 'ia'})
-    return {'generado': '2026-11-16T00:00:00+00:00', 'oposicion': 'auxiliar-age', 'examenes': [{'anio': 2022, 'plantilla_tipo': 'provisional'}], 'preguntas': pre}
+    return {'generado': '2026-11-16T00:00:00+00:00', 'oposicion': 'auxiliar-age', 'examenes': [{'anio': y, 'ok': True, 'preguntas': 120, 'con_respuesta': 119, 'anuladas': 1, 'por_parte': {'p1': 60, 'p2': 50}, 'reserva': 10, 'plantilla_tipo': 'provisional' if y == 2022 else 'definitiva', 'cotejo': {'coincide': True, 'publicadas': 1, 'fuente': 'https://example.org'} if y == 2024 else None} for y in (2019, 2022, 2023, 2024, 2025, 2026)] + [{'anio': 2016, 'ok': False, 'excluido': True, 'error': 'excluido: escaneado'}], 'preguntas': pre}
 
 async def main():
     ok = True
@@ -85,7 +104,7 @@ async def main():
         check('resultado con nota por partes', 'Primera parte' in txt and 'Segunda parte' in txt and 'directa' in txt)
         await h.shot(str(OUT / '2_simulacro.png'))
         # reto diario
-        await p.evaluate('go(4)'); await p.wait_for_timeout(300)
+        await p.evaluate('go(5)'); await p.wait_for_timeout(300)
         n = await p.evaluate('S.reto.qs.length'); check('reto con 10 preguntas', n == 10, str(n))
         for i in range(n):
             await p.click('#retoQ .om-op[data-op="2"]'); await p.wait_for_timeout(50)
@@ -99,36 +118,64 @@ async def main():
         await p.select_option('#genTema', 'b1-11')
         await p.click('#btnGen'); await p.wait_for_selector('#mIA.on')
         await p.fill('#apiKey', 'sk-test-clave-larga-de-prueba-123'); await p.keyboard.press('Escape')
-        await p.select_option('#genN', '5'); await p.click('#btnGen'); await p.wait_for_selector('#mEnvio.on')
+        await p.select_option('#genN', '10'); await p.click('#btnGen'); await p.wait_for_selector('#mEnvio.on')
         env = await p.inner_text('#envioTxt')
         check('aviso previo con muestra de lo que sale', 'preparador experto' in env and 'Procedimiento administrativo' in env)
         await p.check('#envioOk'); await p.click('#envioSi')
         await h.esp('S.genStats !== null')
         st = await p.evaluate('S.genStats')
-        check('agentes: 1 aceptada, 1 dudosa, 3 descartadas', (st['aceptadas'], st['dudosas'], st['descartadas']) == (1, 1, 3), json.dumps(st, ensure_ascii=False))
+        check('panel: de 10 pedidas y 6 redactadas, 1 aceptada, 1 dudosa y 8 descartadas (4 por el panel o el código, 4 que no llegaron)', (st['aceptadas'], st['dudosas'], st['descartadas']) == (1, 1, 8), json.dumps(st, ensure_ascii=False))
         mot = ' '.join(st['motivos'])
         check('el código descarta formato erróneo y copia del banco', 'opciones repetidas' in mot and 'se parece demasiado' in mot, mot)
         check('se descarta la clave equivocada aunque la diga el redactor', 'ninguno de los dos resolutores' in mot)
-        check('tres llamadas a la IA (redactor + 2 resolutores)', len(h.seen) == 3, str(len(h.seen)))
+        check('el Contradictor descarta aunque los resolutores coincidan', 'descartada por el panel' in mot)
+        check('cinco llamadas a la IA (redactor, 2 resolutores, Contradictor y Lista)', len(h.seen) == 5, str(len(h.seen)))
         res = await p.evaluate("S.gen.find(g=>g.estado==='aceptada').resolutores.map(r=>r.opcion)")
         check('las opciones barajadas se devuelven a su número original', res == [2, 2], str(res))
         await h.shot(str(OUT / '3_generador.png'))
         fn = await h.descarga('#btnGenWord', str(OUT / 'gen.docx')); check('Word de las preguntas aceptadas', fn.endswith('.docx') and (OUT / 'gen.docx').read_bytes()[:2] == b'PK')
         fn = await h.descarga('#btnGenGift', str(OUT / 'gen.gift.txt')); check('GIFT para Moodle', '=CORRECTA buena' in (OUT / 'gen.gift.txt').read_text())
+        # «¿Por qué?» sobre una pregunta del reto (ya respondida)
+        await p.evaluate('go(5)'); await p.wait_for_timeout(300)
+        await p.click('#retoQ [data-porque]'); await h.esp("document.querySelector('#retoQ .om-expbox') !== null")
+        check('«¿Por qué?»: explicación anclada a la respuesta de la plantilla', 'IDEA CLAVE DE PRUEBA' in await p.inner_text('#retoQ') and 'Respuesta de la plantilla:' in h.seen[-1].get('user', '') if isinstance(h.seen[-1], dict) else 'IDEA CLAVE DE PRUEBA' in await p.inner_text('#retoQ'))
+        check('la explicación se guarda (no se paga dos veces)', await p.evaluate('Object.keys(S.explic).length') == 1)
+        # examen completo con IA (25 preguntas), con relleno de oficiales
+        LLAMADAS['modo'] = 'examen'
+        await p.evaluate('go(4)'); await p.wait_for_timeout(200)
+        check('examen con IA: estimación de llamadas antes de empezar', 'llamadas' in await p.inner_text('#exEstima'))
+        await p.select_option('#exN', '25'); await p.click('#btnExGen')
+        await h.esp("S.examenIA && S.examenIA.estado === 'listo'", n=400)
+        X = await p.evaluate('({n: S.examenIA.n, ia: S.examenIA.preguntas.filter(q=>q.ia).length, tot: S.examenIA.preguntas.length, bl: [...new Set(S.examenIA.preguntas.map(q=>q.bloque))].length})')
+        check('examen con IA: 25 preguntas del panel en los tres bloques', X['n'] == 25 and X['ia'] == 25 and X['bl'] == 3, str(X))
+        await p.click('#btnExSim'); await p.wait_for_timeout(300)
+        check('examen con IA: simulacro con bloques en orden', await p.evaluate('S.sim.ia') and await p.evaluate("(b=>b.join()===[...b].sort((x,y)=>['b1','psico','b2'].indexOf(x)-['b1','psico','b2'].indexOf(y)).join())(S.sim.qs.map(preg).map(q=>q.bloque))"))
+        LLAMADAS['modo'] = None
+        await h.shot(str(OUT / '9_examen_ia.png'))
+        await p.evaluate('go(9)'); await p.wait_for_timeout(200)
+        check('Mis generadas: el examen y las preguntas sueltas', await p.locator('#miasEx .om-fila').count() == 1 and await p.locator('#miasGen details').count() == 2)
+        fn = await h.descarga('#btnMiasCopia', str(OUT / 'mias.json')); check('copia JSON de Mis generadas', json.loads((OUT / 'mias.json').read_text())['oposicion'] == 'auxiliar-age')
+        await p.evaluate('go(10)'); await p.wait_for_timeout(200)
+        check('Tu clave de IA: guía y coste con el examen completo', 'platform.openai.com' in await p.inner_text('#clavePasos') and 'llamadas' in await p.inner_text('#claveCoste'))
         await p.reload(); await p.wait_for_timeout(700)
-        check('al recargar se conservan racha y preguntas', await p.evaluate("S.racha['auxiliar-age'].n") == 1 and await p.evaluate('S.gen.length') == 2)
+        check('al recargar se conservan racha, preguntas y examen generado', await p.evaluate("S.racha['auxiliar-age'].n") == 1 and await p.evaluate('S.gen.length') == 2 and await p.evaluate('S.archivo.length') == 1 and await p.evaluate('S.examenIA === S.archivo[0]'))
+        # estado por oposición: aparcar y recuperar
+        r = await p.evaluate("(()=>{ const g=S.gen.length; aparcaOp(); activaOp('otra-op'); const vacio=S.gen.length===0&&S.archivo.length===0; aparcaOp(); activaOp('auxiliar-age'); return vacio && S.gen.length===g && S.archivo.length===1; })()")
+        check('estado por oposición: cada una guarda su estudio aparte', r)
         # idiomas
         falt = await h.faltan_traducciones(); check('no faltan traducciones', falt == [], str(falt[:8]))
         await h.idioma('en'); await p.evaluate('go(1)'); await p.wait_for_timeout(300)
         tx = await p.inner_text('#predBloques'); check('en inglés: bloques y temas traducidos', 'Block I' in tx and 'Spanish Constitution' in tx and 'Topic' in tx)
         await h.idioma('pt'); await p.evaluate('go(0)'); await p.wait_for_timeout(300); check('en portugués: portada traducida', 'Escolha o seu concurso' in await p.inner_text('section[data-step="0"]'))
-        for s in (2, 3, 4):
-            await p.evaluate(f'go({s})'); await p.wait_for_timeout(150)
+        for s in range(2, 11):
+            await p.evaluate(f'go({s})'); await p.wait_for_timeout(120)
         await h.idioma('es')
         check('sin errores de página', not h.errors, str(h.errors))
         check('móvil sin desborde (portada)', not await h.desborde_movil())
         check('móvil sin desborde (predicción)', not await h.desborde_movil('go(1)'))
         check('móvil sin desborde (simulacro en marcha)', not await h.desborde_movil("creaSim('x',10,'probable','real');go(2)"))
+        for pas, nom in ((6, 'mi estudio'), (7, 'banco'), (8, 'validación'), (9, 'mis generadas'), (10, 'tu clave')):
+            check(f'móvil sin desborde ({nom})', not await h.desborde_movil(f'go({pas})'))
         await p.set_viewport_size({'width': 390, 'height': 844}); await p.evaluate('go(0)'); await h.shot(str(OUT / '5_movil_inicio.png'))
         await p.evaluate('go(1)'); await h.shot(str(OUT / '6_movil_pred.png')); await p.set_viewport_size({'width': 1360, 'height': 900})
     # ── con datos «reales» (sintéticos) servidos como data/auxiliar-age/banco.json ──
@@ -155,7 +202,38 @@ async def main():
         await p.evaluate("go(2)"); await p.click('#simExamen .om-op[data-op="1"]'); await p.wait_for_timeout(100)
         check('pregunta con año del examen y aviso de plantilla provisional al corregir', 'Examen 20' in await p.inner_text('#simExamen'))
         await p.goto((ROOT / 'index.html').as_uri() + '?op=auxiliar-age&reto'); await p.wait_for_timeout(600)
-        check('?reto abre el reto diario', await p.evaluate('step') == 4)
+        check('?reto abre el reto diario', await p.evaluate('step') == 5)
+        for i in range(10):
+            await p.click('#retoQ .om-op[data-op="2"]'); await p.wait_for_timeout(40)
+            if i < 9: await p.click('#retoQ [data-mov="1"]'); await p.wait_for_timeout(25)
+        n = await p.evaluate('Object.keys(S.hist).length'); check('las respuestas del reto entran en el historial', n == 10, str(n))
+        fallos = await p.evaluate("Object.values(S.hist).filter(e=>e.ko).length")
+        await p.evaluate('go(6)'); await p.wait_for_timeout(300)
+        check('Mi estudio: los fallos están en el repaso', f'Preguntas en tu repaso: {fallos}' in await p.inner_text('#repasoBox'), await p.inner_text('#repasoBox'))
+        check('Mi estudio: plan con una fila por tema', await p.locator('#planBox tbody tr').count() == len([t for t in CFG['temas']]) - 0 or await p.locator('#planBox tbody tr').count() > 20)
+        await h.shot(str(OUT / '10_estudio.png'))
+        # banco: examen oficial de un año y buscador
+        await p.evaluate('go(7)'); await p.wait_for_timeout(300)
+        check('banco: un examen por año', await p.locator('#bancoAnio option').count() == 6)
+        await p.select_option('#bancoAnio', '2026'); await p.click('#btnAnio'); await p.wait_for_timeout(300)
+        r = await p.evaluate('({n: S.sim.qs.length, anio: S.sim.anio, res: S.sim.qs.map(preg).some(q=>q.reserva||q.anulada||q.imagen)})')
+        check('examen oficial de 2026: puntuables sin reserva, anuladas ni tablas', r['anio'] == 2026 and r['n'] == 108 and not r['res'], str(r))
+        check('enlace del examen por año', '&anio=2026' in await p.evaluate('enlaceSim(S.sim)'))
+        await p.evaluate('go(7)'); await p.fill('#busTexto', 'Enunciado oficial 2024'); await p.wait_for_timeout(500)
+        check('buscador por palabras y año', 'preguntas oficiales con respuesta' in await p.inner_text('#busRes') and await p.locator('#busRes .om-res').count() == 25)
+        await p.select_option('#busTema', 'b2-09'); await p.wait_for_timeout(200)
+        check('buscador por tema', all('Excel' in x for x in await p.locator('#busRes .om-res small').all_inner_texts()))
+        # validación
+        await p.evaluate('go(8)'); await p.wait_for_timeout(300)
+        vt = await p.inner_text('#valTabla')
+        check('validación: tabla de exámenes con cotejo y plantilla provisional', 'coincide' in vt and 'provisional' in vt and '60 + 50' in vt, vt[:200])
+        check('validación: exámenes apartados y su motivo', 'apartado: escaneado' in await p.inner_text('#valLista'))
+        check('validación: fiabilidad de la predicción por bloque', (await p.inner_text('#valPred')).count('a ciegas') == 3)
+        await h.shot(str(OUT / '11_validacion.png'))
+        # aviso de error desde una pregunta corregida
+        await p.evaluate('go(5)'); await p.wait_for_timeout(200)
+        href = await p.get_attribute('#retoQ a[href*="issues/new"]', 'href')
+        check('«Avisar de un error» abre una incidencia de GitHub rellenada', href and 'oraculooposiciones/issues/new' in href and 'Auxiliar%20AGE' in href, str(href)[:120])
         await h.shot(str(OUT / '7_real_reto.png'))
         await p.evaluate('go(1)'); await p.wait_for_timeout(200); await h.shot(str(OUT / '8_real_pred.png'))
         check('sin errores de página (datos reales)', not h.errors, str(h.errors))
