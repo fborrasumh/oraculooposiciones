@@ -23,7 +23,9 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - name: Dependencias
-        run: pip install pdfplumber==0.11.4
+        run: |
+          pip install pdfplumber==0.11.4 pillow
+          sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-spa poppler-utils   # OCR de los cuadernillos escaneados (2015-2019)
       - name: Pruebas del extractor
         run: python tests/test_datos.py
       - name: Descargar cuadernillos y plantillas

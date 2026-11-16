@@ -76,13 +76,22 @@ Como la estructura es fija, **la predicción se hace dentro de cada bloque**: c�
    - Escribe `banco.json` e `informe.md`, con preguntas, partes, reserva, respuestas leídas y anuladas de cada examen.
 3. `scripts/opos_clasifica_ia.py` asigna el tema con IA (secreto `OPENAI_API_KEY`, modelo `gpt-6-luna`), ofreciendo solo los temas del bloque de cada pregunta.
 
-Exámenes del turno libre localizados en la sede del INAP: 2015, 2016, 2017 (sin plantilla localizada), 2019, 2022 (plantilla provisional), 2023, 2024, 2025 (llamamiento extraordinario) y 2026. Los años 2015-2022 son aproximados: el flujo intenta leer la fecha de la portada del cuadernillo.
+Exámenes del turno libre en el banco (sede del INAP): 2022 (plantilla provisional), 2023, 2024, 2025 (llamamiento extraordinario) y 2026, con 599 preguntas en total. En los cinco, el emparejamiento con la plantilla cubre todas las preguntas y las anuladas coinciden con las publicadas.
+
+Los de 2015, 2016, 2017 y 2019 también están localizados y descargados, pero se apartan (`"usar": false` en `fuentes.json`):
+- son escaneos y el OCR comete demasiados errores;
+- su segunda parte tenía otra estructura;
+- su temario y su ofimática son antiguos (Windows 7, Office 2010).
+
+El extractor ya lleva OCR (tesseract) por si se quieren recuperar.
+
+Las plantillas del INAP van a dos columnas (primera parte a la izquierda y segunda a la derecha, cada una con su reserva). El extractor lee primero la columna izquierda y luego la derecha.
 
 **Antes de dar los datos por buenos:**
 - Revisa el informe (60 + 50 preguntas por examen en los recientes).
 - Contrasta a mano al menos 20 preguntas por examen con el PDF.
 
-Mientras no exista `banco.json`, la app funciona en **modo demostración**: recuentos ficticios y 15 preguntas escritas para la demo, todo marcado como tal.
+Si no existe `banco.json`, la app funciona en **modo demostración**: recuentos ficticios y 15 preguntas escritas para la demo, todo marcado como tal.
 
 ## Privacidad
 

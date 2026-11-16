@@ -25,11 +25,11 @@ def norm(s):
 
 
 # ── 1 · cuadernillo ──────────────────────────────────────────────────────────────────────────────
-RUIDO = re.compile(r'^\s*(-\s*\d+\s*-|\d+\s*/\s*\d+|p[aá]gina\s+\d+.*|modelo\s+[ab]\s*$|aux[\s-]*l.*\d{2,4}.*|cuerpo general auxiliar.*|instituto nacional de administraci[oó]n p[uú]blica.*|ministerio .*|comisi[oó]n permanente de selecci[oó]n.*)\s*$', re.I)
-QNUM = re.compile(r'^\s*(\d{1,3})\s*[.)]\s*(.*)$')
-OPC = re.compile(r'^\s*([a-dA-D])\s*[).]\s*(.*)$')
+RUIDO = re.compile(r'^\s*(\d{2,4}\s+aux[\s–-]*l.*|-\s*\d+\s*-|\d+\s*/\s*\d+|p[aá]gina\s+\d+.*|modelo\s+[ab]\s*$|aux[\s-]*l.*\d{2,4}.*|cuerpo general auxiliar.*|instituto nacional de administraci[oó]n p[uú]blica.*|ministerio .*|comisi[oó]n permanente de selecci[oó]n.*)\s*$', re.I)
+QNUM = re.compile(r'^\s*(\d{1,3})\s*[.,)]\s*[—–-]?\s*(.*)$')     # «14, —» y «12. —» salen así del OCR
+OPC = re.compile(r'^\s*([a-dA-D])\s*j?\s*[).\]}|]\s*(.*)$|^\s*([a-d])j\s+(.*)$')   # «aj», «bj)» = «a)», «b)» mal leídos por el OCR
 CAB = re.compile(r'(primera|segunda)\s+parte|preguntas?\s+de\s+reserva|\breserva\b', re.I)
-CONTEXTO = re.compile(r'responda\s+a\s+las\s+preguntas|preguntas\s+\d{1,3}\s+a\s+(la\s+)?\d{1,3}|siguiente\s+(tabla|cuadro|gr[aá]fico|texto|relaci[oó]n)|a\s+continuaci[oó]n\s+se\s+(presenta|muestra|recoge)', re.I)
+CONTEXTO = re.compile(r'^\s*\d{1,3}\s+a\s+\d{1,3}\s*[.:]|tabla\s+siguiente|responda\s+(a\s+)?las\s+(\w+\s+)?preguntas|preguntas\s+\d{1,3}\s+a\s+(la\s+)?\d{1,3}|siguiente\s+(tabla|cuadro|gr[aá]fico|texto|relaci[oó]n)|a\s+continuaci[oó]n\s+se\s+(presenta|muestra|recoge)', re.I)
 MATERIAL = re.compile(r'\b(tabla|cuadro|gr[aá]fico|figura|imagen|captura|ilustraci[oó]n)\b|siguiente(s)?\s+datos|datos\s+anteriores', re.I)
 
 
@@ -41,7 +41,15 @@ def cabecera(l):
 
 
 def limpia(texto):
-    return [l.rstrip() for l in texto.replace('\r', '').split('\n') if l.strip() and not RUIDO.match(l)]
+    """Quita cabeceras y pies de página y separa las líneas con dos opciones («a) 3 b) 1»), habituales en psicotécnicos."""
+    out = []
+    for l in texto.replace('\r', '').split('\n'):
+        if not l.strip() or RUIDO.match(l): continue
+        out += re.split(r'\s+(?=[b-dB-D]\)\s)', l) if OPC.match(l) else [l]
+    return [x.rstrip() for x in out]
+
+
+OCR_MODO = False
 
 
 def parse_cuadernillo(texto):
@@ -66,13 +74,19 @@ def parse_cuadernillo(texto):
         if h and (cur is None or len(cur['opciones']) == 4):
             cierra(); marca = h; campo = None; ctx = None; continue
         mq, mo = QNUM.match(l), OPC.match(l)
-        if mo and cur is not None and campo in ('enunciado', 'opcion') and LETRA[mo.group(1).lower()] == len(cur['opciones']) + 1:
-            cur['opciones'].append(mo.group(2).strip()); campo = 'opcion'; continue
+        if mo:
+            letra, txt_op = (mo.group(1) or mo.group(3)).lower(), (mo.group(2) if mo.group(1) else mo.group(4)) or ''
+        if mo and cur is not None and campo in ('enunciado', 'opcion') and LETRA[letra] == len(cur['opciones']) + 1:
+            cur['opciones'].append(txt_op.strip()); campo = 'opcion'; continue
         if mq:
             n, resto = int(mq.group(1)), mq.group(2).strip()
             completa = cur is None or len(cur['opciones']) == 4
             ult = cur['n'] if cur is not None else (qs[-1]['n'] if qs else 0)
-            if completa and (n == ult + 1 or (n == 1 and ult >= 3)):
+            # OCR: si se perdió una opción, la pregunta incompleta se descarta al llegar la siguiente (no se arrastra el error)
+            if not completa and n == ult + 1 and len(cur['opciones']) >= 2 and resto[:1].isupper() or (not completa and n == ult + 1 and len(cur['opciones']) == 3):
+                completa = True; cur['opciones'] = []
+            salto = 3 if OCR_MODO else 1   # con OCR se pierden números de pregunta («8» leído como «a»): se admite un hueco de hasta 2
+            if completa and (ult < n <= ult + salto or (n == 1 and ult >= 3)):
                 if n == 1 and ult >= 3: seg += 1
                 cierra()
                 cur = {'n': n, 'seg': seg, 'marca': marca, 'enunciado': resto, 'opciones': [], 'contexto': ctx_para(n)}; campo = 'enunciado'; continue
@@ -215,24 +229,57 @@ def asigna_tema(q, cfg, ia):
 
 
 # ── 5 · montaje ────────────────────────────────────────────────────────────────────────────────
-def texto_pdf(p):
+def _dos_columnas(pg):
+    """¿Página a dos columnas? (las plantillas del INAP ponen la primera parte a la izquierda y la segunda a la derecha)
+    Casi ninguna palabra cruza el centro y las dos mitades tienen texto."""
+    ws = pg.extract_words(); mid = pg.width / 2
+    if len(ws) < 30: return False
+    cruza = sum(1 for w in ws if w['x0'] < mid < w['x1']); izq = sum(1 for w in ws if w['x1'] <= mid)
+    return cruza / len(ws) < 0.06 and 0.2 < izq / len(ws) < 0.8
+
+
+def texto_pdf(p, columnas=False):
+    """Texto del PDF. columnas=True: si la página va a dos columnas, primero la izquierda entera y luego la derecha.
+    Si casi no tiene texto (escaneado), OCR en español con tesseract (pdftoppm + tesseract -l spa)."""
     import pdfplumber
-    with pdfplumber.open(p) as pdf: return '\n'.join((pg.extract_text() or '') for pg in pdf.pages)
+    partes = []
+    with pdfplumber.open(p) as pdf:
+        for pg in pdf.pages:
+            if columnas and _dos_columnas(pg):
+                w, h = pg.width, pg.height
+                partes += [pg.crop((0, 0, w / 2, h)).extract_text() or '', pg.crop((w / 2, 0, w, h)).extract_text() or '']
+            else: partes.append(pg.extract_text() or '')
+    tx = '\n'.join(partes)
+    if len(tx.strip()) > 300: return tx, False
+    import subprocess, tempfile, glob
+    with tempfile.TemporaryDirectory() as d:
+        subprocess.run(['pdftoppm', '-r', '300', '-gray', '-png', str(p), d + '/pg'], check=True)
+        partes = []
+        from PIL import Image
+        for img in sorted(glob.glob(d + '/pg*.png')):   # umbral: los escaneos del INAP llevan una marca de agua gris que confunde al OCR
+            Image.open(img).convert('L').point(lambda x: 255 if x > 110 else 0).save(img)
+            r = subprocess.run(['tesseract', img, '-', '-l', 'spa', '--psm', '6'], capture_output=True, text=True)
+            partes.append(r.stdout)
+    return '\n'.join(partes), True
 
 
 def procesa(d, cfg, origen):
     anio = int(d.name); inf = {'anio': anio, 'ok': False, 'convocatoria': origen.get('convocatoria'), 'plantilla_tipo': origen.get('plantilla_tipo')}
     cu, pl = d / 'cuadernillo.pdf', d / 'plantilla.pdf'
-    tx = (d / 'cuadernillo.txt').read_text(encoding='utf-8') if (d / 'cuadernillo.txt').exists() else (texto_pdf(cu) if cu.exists() else '')
+    tx = (d / 'cuadernillo.txt').read_text(encoding='utf-8') if (d / 'cuadernillo.txt').exists() else ''
+    if len(tx.strip()) < 300 and cu.exists(): tx, inf['ocr'] = texto_pdf(cu)
     if not tx: inf['error'] = 'falta el cuadernillo'; return [], inf
     (d / 'cuadernillo.txt').write_text(tx, encoding='utf-8')
     fp = fecha_portada(tx); inf['fecha'] = origen.get('fecha') or fp
     anio_ex = int(inf['fecha'][:4]) if inf['fecha'] else anio
+    global OCR_MODO
+    OCR_MODO = bool(inf.get('ocr')) or bool(re.search(r'\n\s*[a-d]j\s', tx))
     qs = mejor_cuadernillo(tx)
     inf['preguntas'] = len(qs)
     if len(qs) < 20: inf['error'] = f'solo se reconocieron {len(qs)} preguntas'; return [], inf
-    tp = (d / 'plantilla.txt').read_text(encoding='utf-8') if (d / 'plantilla.txt').exists() else (texto_pdf(pl) if pl.exists() else '')
-    if tp: (d / 'plantilla.txt').write_text(tp, encoding='utf-8')
+    tp = (d / 'plantilla_columnas.txt').read_text(encoding='utf-8') if (d / 'plantilla_columnas.txt').exists() else ''
+    if len(tp.strip()) < 50 and pl.exists(): tp, _ = texto_pdf(pl, columnas=True)
+    if tp: (d / 'plantilla_columnas.txt').write_text(tp, encoding='utf-8')
     segs = parse_plantilla(tp) if tp else []
     resp = respuestas(qs, segs)
     estructura(qs, cfg)
@@ -249,6 +296,7 @@ def procesa(d, cfg, origen):
     inf['reserva'] = sum(1 for q in out if q['reserva'])
     if tp and inf['cobertura'] < 0.9: inf['aviso'] = f"la plantilla solo cubre el {inf['cobertura']:.0%} de las preguntas: revisa el emparejamiento"
     if not tp: inf['aviso'] = 'sin plantilla: cuenta para la predicción, no entra en simulacros'
+    if inf.get('ocr'): inf['aviso'] = ('texto leído con OCR: revisa erratas. ' + inf.get('aviso', '')).strip()
     if inf['anuladas'] > 10:   # no es creíble: probablemente se ha leído mal la plantilla
         inf['aviso'] = f"{inf['anuladas']} anuladas: plantilla descartada por poco fiable"
         for q in out: q['correcta'], q['anulada'] = None, False
@@ -264,6 +312,9 @@ def main():
     ia = json.loads((base / 'clasificacion_ia.json').read_text(encoding='utf-8')) if (base / 'clasificacion_ia.json').exists() else {}
     preg, informes = [], []
     for d in sorted(p for p in (base / 'raw').glob('20[0-9][0-9]') if p.is_dir()):
+        f = fuentes.get(d.name, {})
+        if f.get('usar') is False:   # examen localizado pero apartado a propósito (fuentes.json explica por qué)
+            informes.append({'anio': int(d.name), 'ok': False, 'excluido': True, 'error': 'excluido: ' + f.get('motivo', '')}); continue
         try: qs, inf = procesa(d, cfg, fuentes.get(d.name, {}))
         except Exception as e: qs, inf = [], {'anio': int(d.name), 'ok': False, 'error': f'{type(e).__name__}: {e}'}
         for q in qs: asigna_tema(q, cfg, ia)

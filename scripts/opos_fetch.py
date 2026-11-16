@@ -48,6 +48,7 @@ def main():
     fuentes = json.loads((base / 'fuentes.json').read_text(encoding='utf-8'))['examenes']
     fallos = 0
     for f in fuentes:
+        if f.get('usar') is False: print(f"{f['anio']}: excluido ({f.get('motivo', '')})"); continue
         d = base / 'raw' / str(f['anio']); d.mkdir(parents=True, exist_ok=True)
         origen = {k: v for k, v in f.items()}
         for clave, nombre in (('cuadernillo', 'cuadernillo.pdf'), ('plantilla', 'plantilla.pdf')):

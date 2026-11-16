@@ -74,6 +74,16 @@ ok(len(segs) == 3, f'B: plantilla con tres segmentos ({len(segs)})')
 resp = D.respuestas(qs, segs)
 ok(resp[(0, 1)] == 2 and resp[(1, 1)] == 3 and resp[(2, 1)] == 4, 'B: cada segmento del cuadernillo se empareja con el suyo de la plantilla')
 
+# B2 · plantilla leída por columnas (izquierda: 1.ª parte y su reserva; derecha: 2.ª parte y su reserva), como las del INAP
+pl = "Primera parte\n" + '\n'.join(f'{n}. a' for n in range(1, 61)) + "\nPreguntas de reserva\n" + '\n'.join(f'{n}. b' for n in range(1, 6)) + "\nSegunda parte\n" + '\n'.join(f'{n}. c' for n in range(1, 51)) + "\n52. d Preguntas de reserva\n" + '\n'.join(f'{n}. d' for n in range(1, 6))
+segs = D.parse_plantilla(pl)
+ok([len(s['resp']) for s in segs][:3] == [60, 5, 50] and segs[0]['resp'][1] == 1 and segs[2]['resp'][1] == 3, f'B2: plantilla por columnas → segmentos 60/5/50/… ({[len(s["resp"]) for s in segs]})')
+
+# D · erratas típicas del OCR: «14, —», «aj», «bj)» y dos opciones por línea
+tx = "1. De acuerdo con la Ley 50/1997, los Vicepresidentes:\naj Han de ser siempre Ministros.\nbj) Asisten sin ser miembros.\nc) Pueden ser Ministros o no.\nd) No asisten.\n2, — Según la Ley 19/2013, ¿cuánto dura el mandato del Presidente del Consejo de Transparencia?\na) Cinco años. b) Cuatro años.\nc) Seis años. d) Tres años.\n"
+D.OCR_MODO = True; qs = D.parse_cuadernillo(tx); D.OCR_MODO = False
+ok(len(qs) == 2 and qs[0]['opciones'][1].startswith('Asisten') and qs[1]['opciones'][1] == 'Cuatro años.', f'D: OCR con «aj», «bj)», «2,» y dos opciones por línea ({len(qs)})')
+
 # C · formato con mayúsculas «A)» y guion de fin de línea
 tx = "1. La Ley 39/2015 regula el procedimiento adminis-\ntrativo común de las Administraciones Públicas. ¿En qué plazo debe resolverse si la norma no fija otro?\nA) Un mes.\nB) Tres meses.\nC) Seis meses.\nD) Diez días.\n" + preg(2) + preg(3)
 qs = D.mejor_cuadernillo(tx)
