@@ -1,0 +1,49 @@
+# Trae los exámenes oficiales de una oposición al repositorio y regenera data/<oposición>/banco.json.
+# Lánzalo desde la pestaña «Actions» → «Datos» → «Run workflow» y elige la oposición.
+name: Datos
+on:
+  workflow_dispatch:
+    inputs:
+      oposicion:
+        description: 'Carpeta de data/ (p. ej. auxiliar-age)'
+        default: 'auxiliar-age'
+        required: true
+      paso:
+        description: 'todo | procesar (sin descargar) | forzar (vuelve a descargarlo todo)'
+        default: 'todo'
+        required: true
+permissions:
+  contents: write
+jobs:
+  datos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Dependencias
+        run: pip install pdfplumber==0.11.4
+      - name: Pruebas del extractor
+        run: python tests/test_datos.py
+      - name: Descargar cuadernillos y plantillas
+        if: inputs.paso != 'procesar'
+        run: python scripts/opos_fetch.py "${{ inputs.oposicion }}" ${{ inputs.paso == 'forzar' && '--forzar' || '' }}
+      - name: Extraer preguntas y clasificar por palabras clave
+        run: python scripts/opos_datos.py "${{ inputs.oposicion }}" || true
+      - name: Tema con IA (secreto OPENAI_API_KEY, modelo gpt-6-luna) y nueva extracción
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MODELO_IA: gpt-6-luna
+        run: python scripts/opos_clasifica_ia.py "${{ inputs.oposicion }}" && python scripts/opos_datos.py "${{ inputs.oposicion }}" || true
+      - name: Informe en el resumen de la ejecución
+        if: always()
+        run: cat "data/${{ inputs.oposicion }}/informe.md" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "Sin informe todavía" >> "$GITHUB_STEP_SUMMARY"
+      - name: Subir los datos al repositorio
+        run: |
+          git config user.name "oraculooposiciones-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A data
+          git diff --cached --quiet || git commit -m "Datos ${{ inputs.oposicion }}: exámenes oficiales y extracción ($(date -u +%F))"
+          git push

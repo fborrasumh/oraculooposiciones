@@ -1,0 +1,22 @@
+{
+  "slug": "oraculooposiciones",
+  "name": "OráculoOposiciones",
+  "tagline": "Qué temas caerán en tu oposición, con simulacros de preguntas oficiales",
+  "eyebrow": "Oposiciones masivas · Exámenes oficiales · Universidad Miguel Hernández de Elche",
+  "h1": "Lo que dicen los exámenes oficiales *sobre tu próxima oposición*",
+  "lede": "OráculoOposiciones cuenta cuántas preguntas ha puesto cada tema en los exámenes oficiales, estima cuántas caerán en el próximo y te dice cuánto fiarte de esa estimación.",
+  "logo_icon": "sparkles",
+  "ia": true,
+  "lang": "es",
+  "langs": ["es", "en", "pt"],
+  "connect_extra": ["'self'"],
+  "i18n": {
+    "en": {"title": "OráculoOposiciones · Which topics will come up in your Spanish civil-service exam", "eyebrow": "Mass civil-service exams · Official exams · Miguel Hernández University of Elche", "h1": "What the official exams say *about your next civil-service exam*", "lede": "OráculoOposiciones counts how many questions each topic has had in the official exams, estimates how many will come up in the next one and tells you how far to trust that estimate. Practise for free with official questions and the answer from the answer key, with the real structure of the exam."},
+    "pt": {"title": "OráculoOposiciones · Que temas vão sair no seu concurso público em Espanha", "eyebrow": "Concursos públicos massivos · Exames oficiais · Universidade Miguel Hernández de Elche", "h1": "O que os exames oficiais dizem *sobre o seu próximo concurso*", "lede": "O OráculoOposiciones conta quantas perguntas cada tema teve nos exames oficiais, estima quantas vão sair no próximo e diz-lhe até que ponto confiar nessa estimativa. Pratique grátis com perguntas oficiais e a resposta da grelha, com a estrutura real do exame."}
+  },
+  "authors": [{"name": "Fernando Borrás Rocher", "orcid": "0000-0002-5519-4573", "affiliation": "Universidad Miguel Hernández de Elche"}],
+  "idea_credit": "De la familia de OráculoMIR y PAUsible (Fernando Borrás Rocher), adaptada a las oposiciones.",
+  "catalog": {"cat": "estudio", "icon": "ti-crystal-ball", "sub_es": "Predicción de oposiciones", "desc_es": "Cuántas preguntas caerán de cada tema en las oposiciones masivas (primero, Auxiliar Administrativo del Estado), con validación a ciegas, simulacros de preguntas oficiales con la estructura real y generador verificado por varios agentes.", "sub_en": "Civil-service exam forecast", "desc_en": "How many questions each topic will have in Spain's mass civil-service exams (first, State Administrative Assistant), with blind validation, mock exams of official questions with the real structure and a generator checked by several agents.", "tit_es": "OráculoOposiciones", "comp_es": "Oposiciones", "tit_en": "OráculoOposiciones", "comp_en": "Civil-service exams"},
+  "modules": ["00-utils", "10-persist", "20-providers", "30-verify", "60-nav", "65-i18n", "70-report"],
+  "app_js": ["i18n.js", "nucleo.js", "datos.js", "app.js"]
+}

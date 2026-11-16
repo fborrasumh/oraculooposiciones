@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "Si usas OráculoOposiciones, cítalo así."
+title: "OráculoOposiciones"
+abstract: "Predicción por tema de las oposiciones masivas españolas (primero, Auxiliar Administrativo del Estado) a partir de los exámenes oficiales, dentro de la estructura fijada por la convocatoria, con validación a ciegas, simulacros de preguntas oficiales con la estructura y la penalización reales, reto diario y generador de preguntas verificado por varios agentes de IA."
+type: software
+version: 1.0.0
+date-released: 2026-11-16
+license: MIT
+repository-code: "https://github.com/fborrasumh/oraculooposiciones"
+url: "https://fborrasumh.github.io/oraculooposiciones/"
+authors:
+  - family-names: "Borrás Rocher"
+    given-names: "Fernando"
+    affiliation: "Universidad Miguel Hernández de Elche"
+    orcid: "https://orcid.org/0000-0002-5519-4573"
+keywords: [oposiciones, Auxiliar Administrativo del Estado, empleo público, predicción, simulacro, inteligencia artificial]

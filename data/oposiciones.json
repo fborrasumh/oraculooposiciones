@@ -1,0 +1,10 @@
+{
+ "_nota": "Registro de oposiciones de OráculoOposiciones. Cada oposición activa tiene su carpeta data/<id>/ con config.json (estructura, temario y palabras clave), fuentes.json (exámenes oficiales) y banco.json (lo genera la GitHub Action «Datos»). Para añadir una oposición: crea su carpeta, rellena config.json y fuentes.json y pon «estado»: «activa».",
+ "oposiciones": [
+  {"id": "auxiliar-age", "nombre": "Auxiliar Administrativo del Estado", "corto": "Auxiliar AGE", "grupo": "C2", "organismo": "Administración General del Estado (convoca la Secretaría de Estado de Función Pública; gestiona el INAP)", "estado": "activa"},
+  {"id": "tramitacion-procesal", "nombre": "Tramitación Procesal y Administrativa", "corto": "Tramitación", "grupo": "C1", "organismo": "Administración de Justicia", "estado": "proximamente"},
+  {"id": "policia-nacional", "nombre": "Policía Nacional (Escala Básica)", "corto": "Policía", "grupo": "C1", "organismo": "Cuerpo Nacional de Policía", "estado": "proximamente"},
+  {"id": "guardia-civil", "nombre": "Guardia Civil (Cabos y Guardias)", "corto": "Guardia Civil", "grupo": "C1", "organismo": "Guardia Civil", "estado": "proximamente"},
+  {"id": "correos", "nombre": "Personal laboral de Correos", "corto": "Cartero", "grupo": "—", "organismo": "Sociedad Estatal Correos y Telégrafos", "estado": "proximamente"}
+ ]
+}
